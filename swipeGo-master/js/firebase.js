@@ -1,7 +1,7 @@
 import {initializeApp} from "https://www.gstatic.com/firebasejs/9.6.2/firebase-app.js";
 import {getAnalytics} from "https://www.gstatic.com/firebasejs/9.6.2/firebase-analytics.js";
 import {isHaveUser} from "./profile.js"
-import {get, getDatabase, onValue, ref, set, push} from "https://www.gstatic.com/firebasejs/9.6.2/firebase-database.js";
+import {get, getDatabase, onValue, ref, set, push, remove} from "https://www.gstatic.com/firebasejs/9.6.2/firebase-database.js";
 
 import {
 	createUserWithEmailAndPassword,
@@ -106,7 +106,7 @@ function pushUserImg(id, url){
 }
 
 function countUserImages(id, img, callback){
-	get(ref(db, 'users/' + id + "/images/count"))
+	get(ref(db, 'users/' + id + "/count"))
 		.then((ref) => {
 			callback(id, img, ref.val())
 		})
@@ -125,7 +125,7 @@ function pushUserImagesResult(id, img, count) {
 			alert('img  qushildi')
 		})
 		.catch(err => console.log(err));
-	set(ref(db, `users/${id}/images/count`), count)
+	set(ref(db, `users/${id}/count`), count)
 		.then((ref) => {
 			console.log('count oshdi');
 		})
@@ -137,7 +137,7 @@ function addUser(userData){
 		.then((ref) => {
 		})
 		.catch(err => console.log(err));
-	set(ref(db, 'users/' + userData.uid + "/images/count"), "0")
+	set(ref(db, 'users/' + userData.uid + "/count"), "0")
 		.then((ref) => {
 			console.log(ref)
 		})
@@ -213,17 +213,22 @@ function getLikes (uid, id, callback){
 	})
 }
 
-function pushLike(uid, id, content) {
-	console.log(uid, id, content)
-	push(ref(db, `users/${uid}/images/${id}/likes`), content)
+function pushLike(uid, id, likeId) {
+	set(ref(db, `users/${uid}/images/${id}/likes/${likeId}`), likeId)
+		.then((ref) => {
+			console.log(ref)
+		})
+		.catch(err => console.log(err));
+}
+function removeLike(uid, id, likeId){
+	remove(ref(db, `users/${uid}/images/${id}/likes/${likeId}`))
 		.then((ref) => {
 			console.log(ref)
 		})
 		.catch(err => console.log(err));
 }
 
-
-export { createUser, signIn, getUsers, getUserImages, getUserData, uploadProcess, readUrl, getLikes, pushLike}
+export { createUser, signIn, getUsers, getUserImages, getUserData, uploadProcess, readUrl, getLikes, pushLike, removeLike}
 
 
 

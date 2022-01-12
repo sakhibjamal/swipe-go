@@ -1,6 +1,6 @@
 //creat element
 import {creatAddUser} from "./user.js";
-import {getLikes, pushLike} from "./firebase.js";
+import {getLikes, pushLike, removeLike} from "./firebase.js";
 
 const myCreateElement = (elementName, attrs = {}, father) => {
 	const element = document.createElement(elementName);
@@ -23,9 +23,11 @@ const getDate = () => {
 }
 
 const renderImgBox = (imagesData, user) => {
+	console.log(imagesData)
 	imgGallery.innerHTML = "";
 	imgGallery.classList.remove("d-none")
-	apiGallery.classList.add("d-none")
+	apiGallery.classList.add("d-none");
+	readMore.classList.add("d-none")
 
 	if(user) {
 		creatAddUser(imgGallery);
@@ -35,47 +37,42 @@ const renderImgBox = (imagesData, user) => {
 
 	imgDatas.map(item => {
 		const id = item[0];
-		console.log(id)
 		const imgData = item[1];
-		console.log(imgData)
 
 		const imgBox = myCreateElement("div", {className: "img-box",}, imgGallery);
+		const img = myCreateElement("img", {id: imgData.id, src: imgData.url, alt: imgData.title ||  imgData.ownerId}, imgBox)
 		const span = myCreateElement("span", {}, imgBox);
 		const download = myCreateElement("div", {className: "download", innerHTML: `<i class="fas fa-download"></i>`}, span);
 		const likes = myCreateElement("div", {className: "comment"}, span);
 		const comment = myCreateElement("div", {className: "cloud", innerHTML: `<i class="fas fa-download"></i>`}, span);
 		const nuqta = myCreateElement("div", {className: "nuqta", innerHTML: `<i class="fas fa-ellipsis-h"></i>`}, span)
 
-		const likeBtn = myCreateElement("i", {className: "far fa-heart", }, likes);
+		const likeBtn = myCreateElement("i", {className: "fas fa-heart text-white", }, likes);
 		const likeCounter = myCreateElement("span", {}, likes);
 		let isLiked = false;
-		let counter;
 		function likeBos(likes) {
-			const likesArr = Object.values(likes);
+			const likesArr = Object.values(likes) || [];
 
-			counter = likesArr.length;
+			const counter = likesArr.length;
 
-			likesArr.map(item => {
-				console.log(item, userUid)
-				if(userUid === item){
-					isLiked = true;
-				}
-			})
-			if(isLiked){
-				likeBtn.className = ("fas fa-heart");
+			if(likesArr.some((item) => item === userUid)){
+				isLiked = true;
+				likeBtn.classList.add("text-danger")
+				likeBtn.classList.remove("text-white");
 			}
+			console.log(counter)
 			likeCounter.innerHTML = counter;
 		}
+
 		getLikes(imgData.ownerId, id, likeBos);
 
-		likeBtn.addEventListener("click", () => {
+		likes.addEventListener('click', () => {
 			if(!isLiked){
-				counter++;
 				pushLike(imgData.ownerId, id, userUid);
+			}else{
+				removeLike(imgData.ownerId, id, userUid);
 			}
 		})
-
-		const img = myCreateElement("img", {id: imgData.id, src: imgData.url, alt: imgData.title ||  imgData.ownerId}, imgBox)
 	})
 }
 
